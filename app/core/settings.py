@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/laundry_db"
+    REDIS_URL: str = "redis://localhost:6373/0"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-it-in-production"

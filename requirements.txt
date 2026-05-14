@@ -9,3 +9,4 @@ python-multipart
 loguru
 alembic
 email-validator
+redis
