@@ -101,3 +101,10 @@ Students can track orders using:
 ### Status Flow
 ```text
 QUEUED → WASHING → READY
+```
+
+
+ ###External APIs
+- Africa's Talking (SMS)
+- Resend (Emails)
+- Safaricom Daraja API (M-Pesa Sandbox)
