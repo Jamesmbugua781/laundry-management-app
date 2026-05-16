@@ -20,6 +20,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    full_name: Mapped[str] = mapped_column(String, nullable=True)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True)
     role: Mapped[str] = mapped_column(String, default=UserRole.STUDENT, nullable=False)
 
     orders: Mapped[List["Order"]] = relationship(back_populates="owner")

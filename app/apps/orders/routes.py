@@ -1,20 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
 from app.core.security import RoleChecker, get_current_user_token_data, TokenData
+from app.core.limiter import limiter
 from app.apps.users.providers import get_user_service
 from app.apps.users.service import UserService
 
-from .schemas import OrderCreate, OrderResponse
+from .schemas import OrderCreate, OrderResponse, OrderStatusUpdate
 from .providers import get_order_service
 from .service import OrderService
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 @router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 def create_order(
+    request: Request,
     order_in: OrderCreate,
     db: Session = Depends(get_db),
     order_service: OrderService = Depends(get_order_service),
@@ -58,6 +61,19 @@ def mark_order_as_paid(
         raise HTTPException(status_code=404, detail="Order not found")
     
     return order_service.mark_as_paid(db, order_id)
+
+@router.patch("/{order_id}/status", response_model=OrderResponse)
+def update_order_status(
+    order_id: int,
+    status_in: OrderStatusUpdate,
+    db: Session = Depends(get_db),
+    order_service: OrderService = Depends(get_order_service),
+    current_staff = Depends(RoleChecker(["staff", "receptionist", "admin"]))
+):
+    order = order_service.update_order_status(db, order_id, status_in.status, actor_email=current_staff.email)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
 
 @router.get("/", response_model=List[OrderResponse])
 def list_orders(
